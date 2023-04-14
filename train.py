@@ -52,6 +52,7 @@ def train(config, inpainting_network, kp_detector, bg_predictor, dense_motion_ne
     with Logger(log_dir=log_dir, visualizer_params=config['visualizer_params'], 
                 checkpoint_freq=train_params['checkpoint_freq']) as logger:
         for epoch in trange(start_epoch, train_params['num_epochs']):
+            
             for x in dataloader:
                 if(torch.cuda.is_available()):
                     x['driving'] = x['driving'].cuda()
