@@ -1,4 +1,4 @@
-import os
+import os, copy
 from skimage import io, img_as_float32
 from skimage.transform import rescale
 from skimage.color import gray2rgb
@@ -140,10 +140,14 @@ class FramesDataset(Dataset):
             num_frames = len(video_array)
             frame_idx = np.sort(np.random.choice(num_frames, replace=True, size=2)) if self.is_train else range(num_frames)
             video_array = video_array[frame_idx]
-            # for img in video_array:
-            #     img = rescale(img, 4)
+            new_video_array = np.zeros((video_array.shape[0], video_array.shape[1]*2, video_array.shape[2]*2, video_array.shape[3]))
 
-            # print(video_array.shape)
+            for i in range(video_array.shape[0]):
+                new_video_array[i] = rescale(video_array[i], 2, multichannel=True)
+            
+            video_array = new_video_array
+            # print(new_video_array.shape)
+            # print(new_video_array)
 
         if self.transform is not None:
             video_array = self.transform(video_array)

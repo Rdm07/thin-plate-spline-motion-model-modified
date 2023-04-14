@@ -296,7 +296,9 @@ class Hourglass(nn.Module):
         # self.out_filters = self.decoder.out_filters
 
     def forward(self, x, mode = 0):
-        return self.decoder(self.encoder(x), mode)
+        out = self.decoder(self.encoder(x), mode)
+        len(out)
+        return out
 
 
 class AntiAliasInterpolation2d(nn.Module):
