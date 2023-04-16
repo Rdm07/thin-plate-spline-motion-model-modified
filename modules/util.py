@@ -103,6 +103,7 @@ def kp2gaussian(kp, spatial_size, kp_variance):
     coordinate_grid = coordinate_grid.view(*shape)
     repeats = kp.shape[:number_of_leading_dimensions] + (1, 1, 1)
     coordinate_grid = coordinate_grid.repeat(*repeats)
+
     # Preprocess kp shape
     shape = kp.shape[:number_of_leading_dimensions] + (1, 1, 2)
     kp = kp.view(*shape)
@@ -171,15 +172,10 @@ class UpBlock2d(nn.Module):
         self.norm = nn.InstanceNorm2d(out_features, affine=True)
 
     def forward(self, x):
-        # print(x.size())
         out = F.interpolate(x, scale_factor=2)
-        # print(out.size())
         out = self.conv(out)
-        # print(out.size())
         out = self.norm(out)
-        # print(out.size())
         out = F.relu(out)
-        # print(out.size())
         return out
 
 
@@ -196,9 +192,7 @@ class DownBlock2d(nn.Module):
         self.pool = nn.AvgPool2d(kernel_size=(2, 2))
 
     def forward(self, x):
-        # print(x.size())
         out = self.conv(x)
-        # print(out.size())
         out = self.norm(out)
         out = F.relu(out)
         out = self.pool(out)
@@ -264,7 +258,6 @@ class Decoder(nn.Module):
             up_blocks.append(UpBlock2d(in_filters, out_filters, kernel_size=3, padding=1))
 
         self.up_blocks = nn.ModuleList(up_blocks)
-        # print(self.up_blocks)
         self.out_channels.append(block_expansion + in_features)
         # self.out_filters = block_expansion + in_features
 
@@ -274,7 +267,6 @@ class Decoder(nn.Module):
         for up_block in self.up_blocks:
             out = up_block(out)
             skip = x.pop()
-            # print(out.size(), skip.size())
             out = torch.cat([out, skip], dim=1)
             outs.append(out)
         if(mode == 0):
@@ -296,9 +288,7 @@ class Hourglass(nn.Module):
         # self.out_filters = self.decoder.out_filters
 
     def forward(self, x, mode = 0):
-        out = self.decoder(self.encoder(x), mode)
-        len(out)
-        return out
+        return self.decoder(self.encoder(x), mode)
 
 
 class AntiAliasInterpolation2d(nn.Module):
@@ -308,20 +298,20 @@ class AntiAliasInterpolation2d(nn.Module):
     def __init__(self, channels, scale):
         super(AntiAliasInterpolation2d, self).__init__()
         sigma = (1 / scale - 1) / 2
-        # print(sigma)
         kernel_size = 2 * round(sigma * 4) + 1
         self.ka = kernel_size // 2
         self.kb = self.ka - 1 if kernel_size % 2 == 0 else self.ka
 
         kernel_size = [kernel_size, kernel_size]
-        # print(kernel_size)
         sigma = [sigma, sigma]
-        # print(sigma)
         # The gaussian kernel is the product of the
         # gaussian function of each dimension.
         kernel = 1
         meshgrids = torch.meshgrid(
-            [torch.arange(size, dtype=torch.float32) for size in kernel_size]
+            [
+                torch.arange(size, dtype=torch.float32)
+                for size in kernel_size
+                ]
         )
         for size, std, mgrid in zip(kernel_size, sigma, meshgrids):
             mean = (size - 1) / 2
