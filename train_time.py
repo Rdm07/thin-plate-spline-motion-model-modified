@@ -54,6 +54,7 @@ def train(config, inpainting_network, kp_detector, bg_predictor, dense_motion_ne
         start_training = time.time()
         for epoch in trange(start_epoch, train_params['num_epochs']):
             start = time.time()
+            print(len(dataloader))
             for id, x in enumerate(dataloader):
                 if(torch.cuda.is_available()):
                     x['driving'] = x['driving'].cuda()
