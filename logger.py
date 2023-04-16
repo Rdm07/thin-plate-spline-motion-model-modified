@@ -94,7 +94,7 @@ class Logger:
         if (self.epoch + 1) % self.checkpoint_freq == 0:
             self.save_cpk()
         self.log_scores(self.names)
-        # self.visualize_rec(inp, out)
+        self.visualize_rec(inp, out)
 
 
 class Visualizer:
