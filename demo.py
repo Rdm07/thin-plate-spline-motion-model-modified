@@ -1,6 +1,6 @@
 import matplotlib
 matplotlib.use('Agg')
-import sys
+import sys, warnings
 import yaml
 from argparse import ArgumentParser
 from tqdm import tqdm
@@ -14,6 +14,8 @@ from modules.inpainting_network import InpaintingNetwork
 from modules.keypoint_detector import KPDetector
 from modules.dense_motion import DenseMotionNetwork
 from modules.avd_network import AVDNetwork
+
+warnings.filterwarnings("ignore")
 
 if sys.version_info[0] < 3:
     raise Exception("You must use Python 3 or higher. Recommended version is Python 3.9")
@@ -159,7 +161,7 @@ if __name__ == "__main__":
         device = torch.device('cpu')
     else:
         device = torch.device('cuda')
-    
+        
     source_image = resize(source_image, opt.img_shape)[..., :3]
     driving_video = [resize(frame, opt.img_shape)[..., :3] for frame in driving_video]
     inpainting, kp_detector, dense_motion_network, avd_network = load_checkpoints(config_path = opt.config, checkpoint_path = opt.checkpoint, device = device)

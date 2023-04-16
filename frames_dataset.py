@@ -33,9 +33,10 @@ def read_video(name, frame_shape):
 
         if image.shape[2] == 4:
             image = image[..., :3]
-
+        # print(image.shape)
+        # print(image)
         image = img_as_float32(image)
-
+        # print(image)
         video_array = np.moveaxis(image, 1, 0)
         # print(frame_shape)
         video_array = video_array.reshape((-1,) + frame_shape)
@@ -113,10 +114,8 @@ class FramesDataset(Dataset):
         else:
             name = self.videos[idx]
             path = os.path.join(self.root_dir, name)
-            # print(path)
 
         video_name = os.path.basename(path)
-        # print(video_name)
         if self.is_train and os.path.isdir(path):
 
             frames = os.listdir(path)
@@ -134,20 +133,10 @@ class FramesDataset(Dataset):
             else:
                 video_array = [resize_fn(io.imread(os.path.join(path, frames[idx]))) for idx in frame_idx]
         else:
-            # print(self.frame_shape)
             video_array = read_video(path, frame_shape=self.frame_shape)
-            
             num_frames = len(video_array)
             frame_idx = np.sort(np.random.choice(num_frames, replace=True, size=2)) if self.is_train else range(num_frames)
             video_array = video_array[frame_idx]
-            new_video_array = np.zeros((video_array.shape[0], video_array.shape[1]*2, video_array.shape[2]*2, video_array.shape[3]))
-
-            for i in range(video_array.shape[0]):
-                new_video_array[i] = rescale(video_array[i], 2, multichannel=True)
-            
-            video_array = new_video_array
-            # print(new_video_array.shape)
-            # print(new_video_array)
 
         if self.transform is not None:
             video_array = self.transform(video_array)

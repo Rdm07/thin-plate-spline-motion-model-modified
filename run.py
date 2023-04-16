@@ -2,7 +2,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 import os, sys, warnings
-import yaml
+import yaml, cv2
 from argparse import ArgumentParser
 from time import gmtime, strftime
 from shutil import copy
@@ -14,7 +14,7 @@ from modules.bg_motion_predictor import BGMotionPredictor
 from modules.dense_motion import DenseMotionNetwork
 from modules.avd_network import AVDNetwork
 import torch
-from train_time import train
+from train import train
 from train_avd import train_avd
 from reconstruction import reconstruction
 import os 
@@ -31,6 +31,8 @@ if __name__ == "__main__":
     parser.add_argument("--mode", default="train", choices=["train", "reconstruction", "train_avd"])
     parser.add_argument("--log_dir", default='log', help="path to log into")
     parser.add_argument("--checkpoint", default=None, help="path to checkpoint to restore")
+    parser.add_argument("--device_ids", default="0,1", type=lambda x: list(map(int, x.split(','))),
+                        help="Names of the devices comma separated.")
 
     opt = parser.parse_args()
     with open(opt.config) as f:
@@ -46,8 +48,7 @@ if __name__ == "__main__":
                                         **config['model_params']['common_params'])
 
     if torch.cuda.is_available():
-        print("Using GPU")
-        cuda_device = torch.device('cuda')
+        cuda_device = torch.device('cuda:'+str(opt.device_ids[0]))
         inpainting.to(cuda_device)
 
     kp_detector = KPDetector(**config['model_params']['common_params'])
@@ -55,21 +56,21 @@ if __name__ == "__main__":
                                               **config['model_params']['dense_motion_params'])
                                                            
     if torch.cuda.is_available():
-        kp_detector.to(cuda_device)
-        dense_motion_network.to(cuda_device)
+        kp_detector.to(opt.device_ids[0])
+        dense_motion_network.to(opt.device_ids[0])
 
     bg_predictor = None
     if (config['model_params']['common_params']['bg']):
         bg_predictor = BGMotionPredictor()
         if torch.cuda.is_available():
-            bg_predictor.to(cuda_device)
+            bg_predictor.to(opt.device_ids[0])
 
     avd_network = None
     if opt.mode == "train_avd":
         avd_network = AVDNetwork(num_tps=config['model_params']['common_params']['num_tps'],
                              **config['model_params']['avd_network_params'])
         if torch.cuda.is_available():
-            avd_network.to(cuda_device)
+            avd_network.to(opt.device_ids[0])
 
     dataset = FramesDataset(is_train=(opt.mode.startswith('train')), **config['dataset_params'])
 
