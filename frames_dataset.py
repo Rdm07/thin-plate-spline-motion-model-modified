@@ -33,14 +33,14 @@ def read_video(name, frame_shape):
 
         if image.shape[2] == 4:
             image = image[..., :3]
-        # print(image.shape)
-        # print(image)
+        
         image = img_as_float32(image)
-        # print(image)
-        video_array = np.moveaxis(image, 1, 0)
-        # print(frame_shape)
-        video_array = video_array.reshape((-1,) + frame_shape)
-        video_array = np.moveaxis(video_array, 1, 2)
+        
+        img_h, img_w, img_c = image.shape
+        if img_h != frame_shape[0] and img_w != frame_shape[0]:
+            raise Exception("Check Frame Shape")
+        
+        video_array = np.array([image[x:x+frame_shape[0], y:y+frame_shape[0]] for x in range(0,img_h,frame_shape[0]) for y in range(0,img_w,frame_shape[0])])
 
     elif name.lower().endswith('.gif') or name.lower().endswith('.mp4') or name.lower().endswith('.mov'):
         video = mimread(name)
@@ -66,7 +66,7 @@ class FramesDataset(Dataset):
       - folder with all frames
     """
 
-    def __init__(self, root_dir, frame_shape=(64, 64, 3), id_sampling=False, is_train=True,
+    def __init__(self, root_dir, frame_shape=(256, 256, 3), id_sampling=False, is_train=True,
                  random_seed=0, pairs_list=None, augmentation_params=None):
         self.root_dir = root_dir
         self.videos = os.listdir(root_dir)
