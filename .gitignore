@@ -3,3 +3,4 @@ log/*
 *.pth
 *.pyc
 checkpoints/*
+data/*
