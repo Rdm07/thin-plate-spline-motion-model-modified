@@ -2,7 +2,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 import os, sys, warnings
-import yaml, cv2
+import yaml
 from argparse import ArgumentParser
 from time import gmtime, strftime
 from shutil import copy
