@@ -39,7 +39,7 @@ train_params:
   lr_generator: 2.0e-4
   batch_size: 32
   scales: [1, 0.5, 0.25, 0.125]
-  dataloader_workers: 12
+  dataloader_workers: 24
   checkpoint_freq: 10
   dropout_epoch: 35
   dropout_maxp: 0.3
