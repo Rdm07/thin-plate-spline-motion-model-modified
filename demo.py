@@ -148,7 +148,7 @@ if __name__ == "__main__":
 
     source_image = imageio.imread(opt.source_image)
     reader = imageio.get_reader(opt.driving_video)
-    fps = reader.get_meta_data()['fps']
+    # fps = reader.get_meta_data()['fps']
     driving_video = []
     try:
         for im in reader:
@@ -177,5 +177,5 @@ if __name__ == "__main__":
     else:
         predictions = make_animation(source_image, driving_video, inpainting, kp_detector, dense_motion_network, avd_network, device = device, mode = opt.mode)
     
-    imageio.mimsave(opt.result_video, [img_as_ubyte(frame) for frame in predictions], fps=fps)
+    imageio.mimsave(opt.result_video, [img_as_ubyte(frame) for frame in predictions])
 
